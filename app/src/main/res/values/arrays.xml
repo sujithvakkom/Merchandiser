@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sale_types">
+        <item>Sales</item>
+        <item>Return</item>
+    </string-array>
+    <string-array name="delivery_types">
+        <item>Store Pickup</item>
+        <item>Home Delivery</item>
+    </string-array>
+    <string-array name="emirates">
+        <item>Select Emirate...</item>
+        <item>Abu Dhabi</item>
+        <item>Ajman</item>
+        <item>Dubai</item>
+        <item>Fujairah</item>
+        <item>Ras Al Khaimah</item>
+        <item>Sharjah</item>
+        <item>Umm Al Quwain</item>
+        <item>Al Ain</item>
+    </string-array>
+</resources>

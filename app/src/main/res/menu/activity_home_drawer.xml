@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/sell_out"
+            android:icon="@drawable/ic_receipt"
+            android:title="@string/sale_out" />
+        <!--<item
+            android:id="@+id/profile"
+            android:icon="@drawable/ic_profile"
+            android:title="@string/profile" />-->
+        <item
+            android:id="@+id/target"
+            android:icon="@drawable/ic_target"
+            android:title="@string/target" />
+        <!--<item
+            android:id="@+id/checkin"
+            android:icon="@drawable/ic_target"
+            android:title="@string/target" />-->
+    </group>
+
+</menu>

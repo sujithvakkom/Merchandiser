@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1E88E5</color>
+    <color name="colorPrimaryDark">#3949AB</color>
+    <color name="colorAccent">#FF8A65</color>
+    <color name="colorActionBarTextTitle">#FFFFFF</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray">#383838</color>
+    <color name="error_background">#E57373</color>
+    <color name="warning_background">#FF8A65</color>
+    <color name="warning_background2">#4DD0E1</color>
+    <color name="error_foreground">#FFFFFF</color>
+    <color name="success_background">#4DB6AC</color>
+    <color name="success_foreground">#FFFFFF</color>
+    <color name="icon_background">#2BB24C</color>
+</resources>
