@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.File;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -189,6 +190,31 @@ implements Serializable {
             if(DeliveryLines==null || DeliveryLines.isEmpty())return false;
             return  true;
         }
+    }
+
+    public String getPrintableReceipt(String OrderNumber) {
+        String receipt =  String.format("Receipt : %s",OrderNumber);
+        receipt+= System.lineSeparator();
+        receipt+= String.format("Date: %s",SaleDate);
+        receipt+= System.lineSeparator();
+        receipt+= String.format("============================================");
+        double SelleingPriceTotal=0;
+        for  ( DeliveryLine x:this.DeliveryLines
+             ) {
+            receipt+= System.lineSeparator();
+            receipt+= String.format("%s  %s",x.ItemCode,x.Description);
+            receipt+= System.lineSeparator();
+            receipt+= String.format("Qty : %s",x.OrderQuantity);
+            receipt+= String.format("Price : %s",x.SelleingPrice);
+            SelleingPriceTotal+=x.SelleingPrice;
+        }
+        receipt+= System.lineSeparator();
+        receipt+= String.format("============================================");
+        receipt+= System.lineSeparator();
+        receipt+= String.format("Total: %s",SelleingPriceTotal);
+        receipt+= System.lineSeparator();
+        receipt+= String.format("============================================");
+        return  receipt;
     }
 
     protected class BitmapDataObject implements Serializable {

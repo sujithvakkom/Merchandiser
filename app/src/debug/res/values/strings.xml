@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="pref_head_office_default">http://192.168.0.7</string>
+    <string name="pref_head_office_default">http://gsmobiles.grandstores.ae:81</string>
+    <!--<string name="pref_head_office_default">http://192.168.0.7</string>-->
+    <string name="business_excel_end">http://192.168.0.6/</string>
+    <!--<string name="business_excel_end">http://200.100.101.123/</string>-->
 </resources>

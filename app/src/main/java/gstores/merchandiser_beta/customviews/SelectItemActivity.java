@@ -1,25 +1,42 @@
 package gstores.merchandiser_beta.customviews;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.provider.Settings;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.Date;
 import java.util.List;
@@ -35,6 +52,7 @@ import gstores.merchandiser_beta.components.models.homedelivery.DeliveryLine;
 import gstores.merchandiser_beta.components.viewhelpers.ItemModelArrayAdapter;
 import gstores.merchandiser_beta.components.viewhelpers.SelectItemDialogListener;
 import gstores.merchandiser_beta.components.web.BusinessExcelService;
+import gstores.merchandiser_beta.customviews.barcode.BarcodeReaderActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,6 +68,10 @@ import static gstores.merchandiser_beta.components.AppLiterals.VALUE;
 
 public class SelectItemActivity extends AppCompatActivity implements SearchView.OnQueryTextListener,
         SelectItemDialogListener {
+    private static final int BARCODE_READER_ACTIVITY_REQUEST = 1208;
+    private static final int PERMISSION_CALLBACK_CONSTANT = 101;
+    private static final int REQUEST_PERMISSION_SETTING = 102;
+
     private ListView itemModelList;
     private Model selectedModel;
     private ProgressBar progressBar;
@@ -201,7 +223,18 @@ public class SelectItemActivity extends AppCompatActivity implements SearchView.
         getMenuInflater().inflate(R.menu.menu_select_item, menu);
         SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setOnQueryTextListener(this);
+
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.scanBarcode:
+                ScanBarcode();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -273,6 +306,29 @@ public class SelectItemActivity extends AppCompatActivity implements SearchView.
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && resultCode != Activity.RESULT_OK) {
+
+            Snackbar snackbar =
+                    Util.SimpleSnackBar(parentView, "Cannot scan", Snackbar.LENGTH_LONG);
+            View view = snackbar.getView();
+            view.setBackgroundColor(getResources().getColor(R.color.error_background));
+            ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
+                    getResources().getColor(R.color.error_foreground)
+            );
+            snackbar.show();
+            return;
+        }
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
+            filter = barcode.rawValue;
+            setupModel(filter,page,0);
+        }
+    }
+
+    @Override
     public void addModel(Model model, Integer quantity, Integer value) {
         Intent intent = new Intent();
         intent.putExtra(MODEL,model);
@@ -292,5 +348,68 @@ public class SelectItemActivity extends AppCompatActivity implements SearchView.
         intent.putExtra(ISRETURN,isReturn);
         setResult(RESULT_OK,intent);
         finish();
+    }
+
+
+    private String ScanBarcode(){
+        SharedPreferences permissionStatus = getApplicationContext().getSharedPreferences("permissionStatus", this.MODE_PRIVATE);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                //Show Information about why you need the permission
+                AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                builder.setTitle(getString(R.string.grant_permission));
+                builder.setMessage(getString(R.string.permission_camera));
+                builder.setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.M)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+
+                    }
+                });
+                builder.show();
+            } else if (permissionStatus.getBoolean(Manifest.permission.CAMERA, false)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(getString(R.string.grant_permission));
+                builder.setMessage(getString(R.string.permission_location));
+                builder.setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getApplicationContext().getPackageName(), null);
+                        intent.setData(uri);
+                        startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                    }
+                });
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            } else {
+                //just request the permission
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_CALLBACK_CONSTANT);
+                }
+            }
+            SharedPreferences.Editor editor = permissionStatus.edit();
+            editor.putBoolean(Manifest.permission.CAMERA, true);
+            editor.apply();
+        }
+        else {
+            Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
+            startActivityForResult(launchIntent, BARCODE_READER_ACTIVITY_REQUEST);
+        }
+        return null;
     }
 }

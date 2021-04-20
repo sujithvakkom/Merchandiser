@@ -14,4 +14,6 @@ import retrofit2.http.Query;
 public interface IRetailerProvider {
     @GET("/api/RetailerInfoProvider/GetRetailer")
     Call<List<String>> GetRetailer();
+
+    
 }

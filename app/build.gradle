@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'key0'
             keyPassword 'Pass@1234'
-            storeFile file('C:/Users/srkrishnan/Documents/GitHub/GSMerchandiser/newy_key.jks')
+            storeFile file('C:\\Users\\sujithvakkom\\Desktop\\GitHub\\GSMerchandiser\\gstores.merchandiser_beta.jks')
             storePassword 'Pass@1234'
         }
     }
@@ -15,8 +15,8 @@ android {
         applicationIdSuffix ''
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 12
-        versionName '1.0.9.1'
+        versionCode 16
+        versionName '1.0.9.5'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -45,9 +45,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.google.android.gms:play-services:12.0.1'
+    //implementation 'com.google.android.gms:play-services:12.0.1'
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-vision:15.0.2'
     implementation 'com.github.clans:fab:1.6.4'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:7.2.0-beta.1'
+
+    implementation 'com.sunmi:printerlibrary:1.0.8'
+    implementation files('libs/core-3.3.0.jar')
 }

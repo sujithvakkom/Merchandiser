@@ -1,5 +1,6 @@
 package gstores.merchandiser_beta;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,13 +21,14 @@ import gstores.merchandiser_beta.components.Util;
 import gstores.merchandiser_beta.components.models.homedelivery.DeliveryHeader;
 
 import static gstores.merchandiser_beta.components.AppLiterals.RequestCodes.ADD_SALES;
-import static gstores.merchandiser_beta.components.AppLiterals.RequestCodes.CUSTOMER_REQUEST;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener
 , SelloutFragment.OnListFragmentInteractionListener
     ,TargetFragment.OnFragmentInteractionListener
 {
+    private FloatingActionButton fab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +36,7 @@ public class HomeActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab =  findViewById(R.id.bAddSales);
+        fab =  findViewById(R.id.bAddSales);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -78,9 +80,15 @@ public class HomeActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+            return;
         }
+
+        FragmentManager fm = getFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+            return;
+        }
+        super.onBackPressed();
     }
 
     @Override
@@ -117,6 +125,7 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.sell_out) {
             title = getString( R.string.sale_out);
+            fab.setVisibility(View.VISIBLE);
             loadSellOutFragment();
         }
 
@@ -127,7 +136,26 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.target) {
             title = getString( R.string.target);
+            fab.setVisibility(View.GONE);
             loadTargetFragment();
+        }
+
+        if (id == R.id.checkin) {
+            title = getString( R.string.checkin);
+            fab.setVisibility(View.GONE);
+            loadCheckinFragment();
+        }
+
+        if (id == R.id.bonus) {
+            title = getString( R.string.unit_incentive);
+            fab.setVisibility(View.GONE);
+            loadBonusFragment(R.id.bonus);
+        }
+
+        if (id == R.id.dashboard) {
+            title = getString( R.string.dash_board);
+            fab.setVisibility(View.GONE);
+            loadBonusFragment(R.id.dashboard);
         }
 
         // set the toolbar title
@@ -149,6 +177,18 @@ public class HomeActivity extends AppCompatActivity
         this.getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_home,
                         TargetFragment.newInstance("","")).commit();
+    }
+
+    private void loadCheckinFragment() {
+        this.getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_home,
+                        CheckinFragment.newInstance("","")).commit();
+    }
+
+    private void loadBonusFragment(int view) {
+        this.getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_home,
+                        BonusFragment.newInstance(view,"")).commit();
     }
 
     private void loadSellOutFragment() {

@@ -26,6 +26,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 /**
@@ -135,15 +136,41 @@ public class SelloutFragment extends Fragment {
                     progress.dismiss();
                     loadComplete = true;
                     try {
-                        Snackbar snackbar = Util.SimpleSnackBar(view, t.getMessage(), Snackbar.LENGTH_LONG);
+                        throw t;
+                    }
+                    catch (SocketTimeoutException ex){
+                        Snackbar snackbar = Util.SimpleSnackBar(view,
+                                "Connection timeout",
+                                Snackbar.LENGTH_LONG);
                         View view = snackbar.getView();
                         view.setBackgroundColor(getResources().getColor(R.color.error_background));
                         ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
                                 getResources().getColor(R.color.error_foreground)
                         );
                         snackbar.show();
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex) {
+                        Snackbar snackbar = Util.SimpleSnackBar(view,
+                                ex.getLocalizedMessage(),
+                                Snackbar.LENGTH_LONG);
+                        View view = snackbar.getView();
+                        view.setBackgroundColor(getResources().getColor(R.color.error_background));
+                        ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
+                                getResources().getColor(R.color.error_foreground)
+                        );
+                        snackbar.show();
                         ex.printStackTrace();
+                    } catch (Throwable throwable) {
+                        Snackbar snackbar = Util.SimpleSnackBar(view,
+                                "Unknown Error occurred",
+                                Snackbar.LENGTH_LONG);
+                        View view = snackbar.getView();
+                        view.setBackgroundColor(getResources().getColor(R.color.error_background));
+                        ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
+                                getResources().getColor(R.color.error_foreground)
+                        );
+                        snackbar.show();
+                        throwable.printStackTrace();
                     }
                 }
             });

@@ -16,10 +16,18 @@
             android:id="@+id/target"
             android:icon="@drawable/ic_target"
             android:title="@string/target" />
-        <!--<item
+        <item
             android:id="@+id/checkin"
-            android:icon="@drawable/ic_target"
-            android:title="@string/target" />-->
+            android:icon="@drawable/ic_login"
+            android:title="@string/checkin" />
+        <item
+            android:id="@+id/bonus"
+            android:icon="@drawable/ic_bonus"
+            android:title="@string/unit_incentive" />
+        <item
+            android:id="@+id/dashboard"
+            android:icon="@drawable/ic_dashboard"
+            android:title="@string/dash_board" />
     </group>
 
 </menu>

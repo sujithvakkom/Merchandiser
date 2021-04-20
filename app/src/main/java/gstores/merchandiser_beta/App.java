@@ -6,12 +6,20 @@ import android.app.NotificationManager;
 import android.os.Build;
 
 import gstores.merchandiser_beta.components.AppLiterals;
+import gstores.merchandiser_beta.components.printutil.SunmiPrintHelper;
 
 public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
+        initPrinter();
+    }
+
+    private void initPrinter() {
+        try {
+            SunmiPrintHelper.getInstance().initSunmiPrinterService(this);
+        }catch (Exception ex){ ex.printStackTrace();}
     }
 
     private void createNotificationChannel() {

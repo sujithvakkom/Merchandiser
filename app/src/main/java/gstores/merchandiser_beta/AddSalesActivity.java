@@ -51,6 +51,9 @@ import gstores.merchandiser_beta.components.Util;
 import gstores.merchandiser_beta.components.helpers.PreferenceHelpers;
 import gstores.merchandiser_beta.components.models.homedelivery.DeliveryHeader;
 import gstores.merchandiser_beta.components.models.homedelivery.DeliveryLine;
+import gstores.merchandiser_beta.components.printutil.BluetoothUtil;
+import gstores.merchandiser_beta.components.printutil.BytesUtil;
+import gstores.merchandiser_beta.components.printutil.SunmiPrintHelper;
 import gstores.merchandiser_beta.customviews.DeliveryLineAdaptor;
 import gstores.merchandiser_beta.customviews.SaleConfigDialog;
 import gstores.merchandiser_beta.customviews.SelectItemActivity;
@@ -238,7 +241,7 @@ DeliveryLineAdaptor.onDeleteItem
             @Override
             public void onClick(View v) {
                 deliveryHeader.Remarks = editTextRemark.getText().toString();
-                if(deliveryHeader.Retailer==null) {
+                if(deliveryHeader.Retailer==null && deliveryHeader.deliveryType == deliveryTypes[1]) {
                     selectRetailer();
                 }
                 else {
@@ -486,7 +489,7 @@ DeliveryLineAdaptor.onDeleteItem
                 }
         );
         mBuilder.setCancelable(true);
-        mBuilder.setPositiveButton(R.string.cast_tracks_chooser_dialog_ok, new DialogInterface.OnClickListener() {
+        mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (AddSalesActivity.this.saleType.isEmpty()) {
@@ -525,7 +528,7 @@ DeliveryLineAdaptor.onDeleteItem
                 }
         );
         mBuilder.setCancelable(true);
-        mBuilder.setPositiveButton(R.string.cast_tracks_chooser_dialog_ok, new DialogInterface.OnClickListener() {
+        mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -690,91 +693,37 @@ DeliveryLineAdaptor.onDeleteItem
 
         showProgress(true);
         if (deliveryHeader.Validate()) {
+            String baseUrl = PreferenceHelpers.getPreference(
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                    getApplicationContext().getResources().getString(R.string.pref_head_office_key),
+                    getResources().getString(R.string.pref_head_office_default));
+
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(1, TimeUnit.MINUTES)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .build();
+
+            Retrofit.Builder builder = new Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .client(okHttpClient)
+                    .addConverterFactory(GsonConverterFactory.create(
+                            AppLiterals.APPLICATION_GSON_BUILDER));
+
+            Retrofit retrofit = builder.build();
+            final IWebClient client = retrofit.create(IWebClient.class);
             try {
                 String attachmentFile = null;
                 attachmentFile = deliveryHeader.getAttachmentFilePath();
                 if (attachmentFile != null) {
-                    String baseUrl = PreferenceHelpers.getPreference(
-                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
-                            getApplicationContext().getResources().getString(R.string.pref_head_office_key),
-                            getResources().getString(R.string.pref_head_office_default));
-
-                    OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                            .connectTimeout(1, TimeUnit.MINUTES)
-                            .readTimeout(30, TimeUnit.SECONDS)
-                            .writeTimeout(15, TimeUnit.SECONDS)
-                            .build();
-
-                    Retrofit.Builder builder = new Retrofit.Builder()
-                            .baseUrl(baseUrl)
-                            .client(okHttpClient)
-                            .addConverterFactory(GsonConverterFactory.create(
-                                    AppLiterals.APPLICATION_GSON_BUILDER));
-
-                    Retrofit retrofit = builder.build();
-
-                    final IWebClient client = retrofit.create(IWebClient.class);
-
                     final MultipartBody.Part attachment = prepareFilePart(attachmentFile);
-
-                    /*
-                    RequestBody DeliveryJob =deliveryHeader.getRequestBody();
-                    Call<String> call = client.AddDeliveryJobWithAttachment(DeliveryJob, attachment);
-                    Call<String> call = client.AddDeliveryJobWithAttachment(deliveryHeader, attachment);
-                    */
                     Call<String> callSaveAttachment = client.SaveAttachment(attachment);
                     callSaveAttachment.enqueue(new Callback<String>() {
                         @Override
                         public void onResponse(Call<String> call, Response<String> response) {
-                            if (response.body() != null && !response.body().isEmpty()) {
+                            if ((response.body() != null && !response.body().isEmpty()) ) {
                                 deliveryHeader.attachmentName = response.body();
-                                Call<String> callSaveSales = client.SaveSales(deliveryHeader);
-                                callSaveSales.enqueue(new Callback<String>() {
-                                    @Override
-                                    public void onResponse(Call<String> call, Response<String> response) {
-                                        showProgress(false);
-                                        if (response.body() != null && !response.body().isEmpty()) {
-                                            AlertDialog dialog = new AlertDialog.Builder(AddSalesActivity.this)
-                                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(DialogInterface dialog, int which) {
-                                                                    Intent intent = new Intent();
-                                                                    setResult(RESULT_OK,intent);
-                                                                    AddSalesActivity.this.finish();
-                                                                }
-                                                            }
-                                                    )
-                                                    .setMessage("Order Number :" + response.body())
-                                                    .setTitle("Order success.")
-                                                    .setCancelable(false).create();
-
-                                            dialog.show();
-                                        } else {
-                                            Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error updating sales.", Snackbar.LENGTH_LONG);
-                                            View view = snackbar.getView();
-                                            view.setBackgroundColor(getResources().getColor(R.color.error_background));
-                                            ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
-                                                    getResources().getColor(R.color.error_foreground)
-                                            );
-                                            snackbar.show();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onFailure(Call<String> call, Throwable t) {
-                                        showProgress(false);
-                                        if (t != null)
-                                            t.printStackTrace();
-
-                                        Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error updating sales.", Snackbar.LENGTH_LONG);
-                                        View view = snackbar.getView();
-                                        view.setBackgroundColor(getResources().getColor(R.color.error_background));
-                                        ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
-                                                getResources().getColor(R.color.error_foreground)
-                                        );
-                                        snackbar.show();
-                                    }
-                                });
+                                saveSales(client);
                             } else {
                                 showProgress(false);
                                 Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error Saving attachment", Snackbar.LENGTH_LONG);
@@ -802,64 +751,11 @@ DeliveryLineAdaptor.onDeleteItem
                             snackbar.show();
                         }
                     });
-/*
-                call.enqueue(new Callback<String>() {
-                    @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
-                        showProgress(false);
-                        if (response.body() != null)
-                            if (!response.body().isEmpty()) {
-                                AlertDialog dialog = new AlertDialog.Builder(AddSalesActivity.this)
-                                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        AddSalesActivity.this.finish();
-                                                    }
-                                                }
-                                        )
-                                        .setMessage("Order Number :" + response.body())
-                                        .setTitle("Order success.")
-                                        .setCancelable(false).create();
-
-                                dialog.show();
-                            } else {
-                                Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error updating sales.", Snackbar.LENGTH_LONG);
-                                View view = snackbar.getView();
-                                view.setBackgroundColor(getResources().getColor(R.color.error_background));
-                                ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
-                                        getResources().getColor(R.color.error_foreground)
-                                );
-                                snackbar.show();
-                            }
-                        else {
-                            Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error on remote service.", Snackbar.LENGTH_LONG);
-                            View view = snackbar.getView();
-                            view.setBackgroundColor(getResources().getColor(R.color.error_background));
-                            ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
-                                    getResources().getColor(R.color.error_foreground)
-                            );
-                            snackbar.show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<String> call, Throwable t) {
-                        showProgress(false);
-                        if (t != null)
-                            t.printStackTrace();
-
-                        Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error updating sales.", Snackbar.LENGTH_LONG);
-                        View view = snackbar.getView();
-                        view.setBackgroundColor(getResources().getColor(R.color.error_background));
-                        ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
-                                getResources().getColor(R.color.error_foreground)
-                        );
-                        snackbar.show();
-                    }
-                });
-*/
+                } else if(deliveryHeader.deliveryType == deliveryTypes[0]){
+                    deliveryHeader.attachmentName="";
+                    saveSales(client);
                 } else {
-                    Snackbar snackbar = Util.SimpleSnackBar(this.listViewItems, "Error Saving attachment", Snackbar.LENGTH_LONG);
+                    Snackbar snackbar = Util.SimpleSnackBar(this.listViewItems, "Please attach the receipt", Snackbar.LENGTH_LONG);
                     View view = snackbar.getView();
                     view.setBackgroundColor(getResources().getColor(R.color.error_background));
                     ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
@@ -889,6 +785,66 @@ DeliveryLineAdaptor.onDeleteItem
             );
             snackbar.show();
         }
+    }
+
+    private void saveSales(IWebClient client){
+        Call<String> callSaveSales = client.SaveSales(deliveryHeader);
+        callSaveSales.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                showProgress(false);
+                if (response.body() != null && !response.body().isEmpty()) {
+                    AlertDialog dialog = new AlertDialog.Builder(AddSalesActivity.this)
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Intent intent = new Intent();
+                                            setResult(RESULT_OK,intent);
+                                            AddSalesActivity.this.finish();
+                                        }
+                                    }
+                            )
+                            .setMessage("Order Number :" + response.body())
+                            .setTitle("Order success.")
+                            .setCancelable(false).create();
+                    try{
+                        String rv = deliveryHeader.getPrintableReceipt(response.body());
+
+                        if (!BluetoothUtil.isBlueToothPrinter) {
+                            SunmiPrintHelper.getInstance().printText(rv, 24, false, false);
+                            SunmiPrintHelper.getInstance().feedPaper();
+                        } else {
+                        }
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                    dialog.show();
+                } else {
+                    Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error updating sales.", Snackbar.LENGTH_LONG);
+                    View view = snackbar.getView();
+                    view.setBackgroundColor(getResources().getColor(R.color.error_background));
+                    ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
+                            getResources().getColor(R.color.error_foreground)
+                    );
+                    snackbar.show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                showProgress(false);
+                if (t != null)
+                    t.printStackTrace();
+
+                Snackbar snackbar = Util.SimpleSnackBar(listViewItems, "Error updating sales.", Snackbar.LENGTH_LONG);
+                View view = snackbar.getView();
+                view.setBackgroundColor(getResources().getColor(R.color.error_background));
+                ((TextView) view.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(
+                        getResources().getColor(R.color.error_foreground)
+                );
+                snackbar.show();
+            }
+        });
     }
 
     @NonNull

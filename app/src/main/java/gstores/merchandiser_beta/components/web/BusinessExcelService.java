@@ -28,8 +28,11 @@ public interface BusinessExcelService {
     @GET("/api/MobileTargetAPI/AllUserTarget")
     Call< List<UserTargets>> GetAllUserTarget(@Query("UserId") Integer UserId);
 
-    @POST("/api/MobileAPI/UserLocation")
+    @POST("/api/MobileAPI/PostUserLocation")
     Call<UserLocation> postUserLocation(@Body UserLocation UserLocation);
+
+    @GET("/api/MobileAPI/GetUserLocation")
+    Call<UserLocation> getUserLocation(@Query("UserName") String UserName);
 
 
     @Multipart

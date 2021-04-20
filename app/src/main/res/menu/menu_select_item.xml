@@ -7,4 +7,11 @@
         android:icon="@drawable/ic_search"
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView" />
+
+    <item
+        android:id="@+id/scanBarcode"
+        android:title="@string/read_barcode"
+        android:icon="@drawable/ic_barcode_scanner"
+        android:iconTint="@color/white"
+        app:showAsAction="always" />
 </menu>

@@ -14,4 +14,7 @@
     <color name="success_background">#4DB6AC</color>
     <color name="success_foreground">#FFFFFF</color>
     <color name="icon_background">#2BB24C</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="scanner_line">#00ceff</color>
+    <color name="white">#FFF</color>
 </resources>
