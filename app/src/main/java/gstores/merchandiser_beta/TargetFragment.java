@@ -90,11 +90,14 @@ public class TargetFragment extends Fragment {
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         //Construct View
-
+/*
         String baseUrl = PreferenceHelpers.getPreference(
                 PreferenceManager.getDefaultSharedPreferences(getContext()),
                 getContext().getResources().getString(R.string.pref_head_office_key),
-                getResources().getString(R.string.pref_head_office_default));
+                getResources().getString(R.string.pref_head_office_default));*/
+
+        String baseUrl =
+                Util.getSettingById(getContext(),R.string.pref_head_office_key);
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create(

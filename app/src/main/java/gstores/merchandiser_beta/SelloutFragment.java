@@ -79,10 +79,12 @@ public class SelloutFragment extends Fragment {
         progress.setMessage("Loading...");
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
-        String baseUrl = PreferenceHelpers.getPreference(
+        String baseUrl =
+                Util.getSettingById(getContext(),R.string.pref_head_office_key);
+        /*String baseUrl = PreferenceHelpers.getPreference(
                 PreferenceManager.getDefaultSharedPreferences(getContext()),
                 getContext().getResources().getString(R.string.pref_head_office_key),
-                getResources().getString(R.string.pref_head_office_default));
+                getResources().getString(R.string.pref_head_office_default));*/
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create(
