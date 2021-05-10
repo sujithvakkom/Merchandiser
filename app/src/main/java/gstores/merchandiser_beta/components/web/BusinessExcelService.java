@@ -20,7 +20,7 @@ public interface BusinessExcelService {
 
     //i.e. api/MobileAPI/AllProducts/
     @GET("/api/MobileAPI/AllProducts")
-    Call<List<ItemModel>> AllProducts(@Query("Search") String Search, @Query("Page") int Page,@Query("ExtededFilter")boolean ExtededFilter);
+    Call<List<ItemModel>> AllProducts(@Query("Search") String Search, @Query("Page") int Page,@Query("ExtededFilter")boolean ExtededFilter,@Query("UserName") String UserName);
 
     @GET("/api/MobileAPI/AllBrands")
     Call<List<Brand>> AllBrands();

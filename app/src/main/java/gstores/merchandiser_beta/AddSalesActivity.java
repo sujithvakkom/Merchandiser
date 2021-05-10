@@ -696,7 +696,11 @@ DeliveryLineAdaptor.onDeleteItem
             String baseUrl = PreferenceHelpers.getPreference(
                     PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
                     getApplicationContext().getResources().getString(R.string.pref_head_office_key),
-                    getResources().getString(R.string.pref_head_office_default));
+                    getResources().getString(R.string.pref_head_office_key));
+            /*String baseUrl = PreferenceHelpers.getPreference(
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                    getApplicationContext().getResources().getString(R.string.pref_head_office_key),
+                    getResources().getString(R.string.pref_head_office_default));*/
 
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
                     .connectTimeout(1, TimeUnit.MINUTES)

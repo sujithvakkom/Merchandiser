@@ -48,6 +48,8 @@ implements Serializable {
     public String attachmentName;
     @SerializedName("Price")
     public Double Price;
+    @SerializedName("StatusDescription")
+    public String StatusDescription;
 
     public String getSaleType() {
         return saleType;

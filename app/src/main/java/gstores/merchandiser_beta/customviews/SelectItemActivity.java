@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -45,6 +46,7 @@ import java.util.List;
 import gstores.merchandiser_beta.R;
 import gstores.merchandiser_beta.components.AppLiterals;
 import gstores.merchandiser_beta.components.Util;
+import gstores.merchandiser_beta.components.helpers.PreferenceHelpers;
 import gstores.merchandiser_beta.components.models.Item;
 import gstores.merchandiser_beta.components.models.ItemModel;
 import gstores.merchandiser_beta.components.models.Model;
@@ -261,9 +263,20 @@ public class SelectItemActivity extends AppCompatActivity implements SearchView.
 
     private void setupModel(String filter, final int page, final int view) {
         progressBar.setVisibility(View.VISIBLE);
+        final String userName = Util.getToken(getApplicationContext()).user_name;
+
+        String baseUrl = getApplicationContext().getResources().getString(
+                R.string.pref_head_office_key
+        );
+
+        baseUrl = PreferenceHelpers.getPreference(
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                getApplicationContext().getResources().getString(R.string.pref_head_office_key),
+                getResources().getString(R.string.pref_head_office_key));
+/*
         String baseUrl = getApplicationContext().getResources().getString(
                 R.string.pref_head_office_default
-        );
+        );*/
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create());
@@ -272,7 +285,7 @@ public class SelectItemActivity extends AppCompatActivity implements SearchView.
 
         BusinessExcelService client = retrofit.create(BusinessExcelService.class);
 
-        Call<List<ItemModel>> call = client.AllProducts(filter,page,extendedFilter);
+        Call<List<ItemModel>> call = client.AllProducts(filter,page,extendedFilter,userName);
         call.enqueue(new Callback<List<ItemModel>>() {
             @Override
             public void onResponse(Call<List<ItemModel>> call, Response<List<ItemModel>> response) {

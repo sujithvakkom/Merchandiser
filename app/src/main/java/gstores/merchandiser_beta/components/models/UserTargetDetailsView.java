@@ -22,6 +22,10 @@ public class UserTargetDetailsView
     public Double Target;
     @SerializedName("Achievement")
     public Double Achievement;
+    @SerializedName("TotalIncAmt")
+    public Double TotalIncAmt;
+    @SerializedName("TotalAmountAcc")
+    public Double TotalAmountAcc;
 
     @SerializedName("Lines")
     public List<UserTargetDetailsView> Lines;

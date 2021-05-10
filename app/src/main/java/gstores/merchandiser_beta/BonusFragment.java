@@ -63,9 +63,8 @@ public class BonusFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final String baseUrl = getContext().getResources().getString(
-                R.string.business_excel_end
-        );
+        final  String baseUrl =
+                Util.getSettingById(getContext(),R.string.pref_head_office_key);
         View view =inflater.inflate(R.layout.fragment_bonus, container, false);
         WebView browser = (WebView) view.findViewById(R.id.bonusWeb);
         final ContentLoadingProgressBar mProgressView = view.findViewById(R.id.progressBar);

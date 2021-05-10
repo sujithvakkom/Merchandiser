@@ -13,6 +13,7 @@ import gstores.merchandiser_beta.dummy.DummyContent.DummyItem;
 import java.util.List;
 
 import static gstores.merchandiser_beta.components.AppLiterals.APPLICATION_AMOUNT_FORMAT;
+import static gstores.merchandiser_beta.components.AppLiterals.APPLICATION_DATE_MONTH_YEAR_FORMAT;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
@@ -40,9 +41,18 @@ public class SelloutRecyclerViewAdapter extends RecyclerView.Adapter<SelloutRecy
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).Receipt);
-        holder.mContentView.setText(APPLICATION_AMOUNT_FORMAT.format( mValues.get(position).Price));
-        holder.CustomerName.setText( mValues.get(position).CustomerName.length()>0?
-                "Customer Name : "+mValues.get(position).CustomerName:"");
+        holder.mContentView.setText(APPLICATION_AMOUNT_FORMAT.format(mValues.get(position).Price));
+        try {
+            if (mValues.get(position).SaleDate == null)
+                holder.mSaleDate.setText("");
+            else
+                holder.mSaleDate.setText(APPLICATION_DATE_MONTH_YEAR_FORMAT.format(mValues.get(position).SaleDate));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        holder.CustomerName.setText(mValues.get(position).CustomerName.length() > 0 ?
+                "Customer Name : " + mValues.get(position).CustomerName : "No customer details.");
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,6 +76,8 @@ public class SelloutRecyclerViewAdapter extends RecyclerView.Adapter<SelloutRecy
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mIdView;
+        public final TextView mSaleDate;
+        public final TextView mSaleStatus;
         public final TextView mContentView;
         public final TextView CustomerName;
         public DeliveryHeader mItem;
@@ -76,6 +88,9 @@ public class SelloutRecyclerViewAdapter extends RecyclerView.Adapter<SelloutRecy
             mIdView = (TextView) view.findViewById(R.id.item_number);
             mContentView = (TextView) view.findViewById(R.id.content);
             CustomerName = (TextView) view.findViewById(R.id.CustomerName);
+            mSaleDate = (TextView) view.findViewById(R.id.salesDate);
+            mSaleStatus = (TextView) view.findViewById(R.id.StatusDesc);
+            mSaleStatus.setText("");
         }
 
         @Override
